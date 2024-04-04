@@ -9,7 +9,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Biblioteca {
+public class Biblioteca implements Runnable {
     private final List<Livro> livros = new ArrayList<>();
     private final List<Usuario> usuarios = new ArrayList<>();
 
@@ -67,4 +67,18 @@ public class Biblioteca {
             }
         }
     }
+
+    //QUestão thread
+    @Override
+    public void run() {
+        while(!Thread.interrupted()){
+            enviarLembretesDevolucao();
+            try {
+                Thread.sleep(1000*60*60*24);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+    }
+
 }

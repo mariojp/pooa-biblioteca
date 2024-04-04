@@ -14,8 +14,10 @@ public class Main {
     public static void main(String[] args) {
         Biblioteca biblioteca = new Biblioteca();
         fazerCargaInicial(biblioteca);
+        Thread lembretes = new Thread(biblioteca);
         Console sistema = new Console(biblioteca);
         sistema.iniciarConsole();
+        lembretes.interrupt();
     }
 
     private static void fazerCargaInicial(Biblioteca biblioteca) {

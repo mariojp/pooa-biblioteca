@@ -1,10 +1,13 @@
 package br.ucsal.biblioteca.model;
 
 
+import br.ucsal.biblioteca.util.StringSizeMin;
+
 public class Livro {
     private static Integer contadorId = 1;
 
     private final Integer id;
+    @StringSizeMin(3)
     private String titulo;
     private String autor;
     private int anoPublicacao;

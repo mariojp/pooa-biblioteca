@@ -4,8 +4,11 @@ import br.ucsal.biblioteca.controller.Biblioteca;
 import br.ucsal.biblioteca.model.Emprestimo;
 import br.ucsal.biblioteca.model.Livro;
 import br.ucsal.biblioteca.model.Usuario;
+import br.ucsal.biblioteca.util.ValidationUtils;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Scanner;
 
 // Classes Livro e Usuario como fornecido anteriormente
@@ -52,7 +55,7 @@ public class Console {
                     this.enviarLembretesDevolucao();
                     break;
                 case 6:
-                    this.listarUsuariosConsole();
+                    this.listarUsuariosConsole(biblioteca.getUsuarios());
                     break;
                 case 7:
                     sair = true;
@@ -65,25 +68,38 @@ public class Console {
         scanner.close();
     }
 
-    private void listarUsuariosConsole() {
-        System.out.println("\n--- Listar Usuarios ---");
-        for (Usuario usuario : biblioteca.getUsuarios()) {
-            System.out.println("Id: "+usuario.getId());
-            System.out.println("Nome: "+usuario.getNome());
+
+
+    private void listarUsuariosConsole(Collection<?> lista ) {
+        Object primeiroObjeto = lista.iterator().next();
+        Class<?> clazz = primeiroObjeto.getClass();
+        System.out.println("\n--- Listar "+clazz.getTypeName() +" ---");
+        try {
+            Field[] fields = clazz.getDeclaredFields(); // Obtem todos os campos da classe, incluindo privados
+            for (Object usuario : lista) {
+                for (Field field : fields) {
+                    field.setAccessible(true); // Permite acesso a campos privados
+                    Object valor = field.get(usuario); // Obtém o valor do campo para o objeto atual
+                    System.out.println(field.getName() + ": " + valor);
+                }
+                System.out.println(); // Linha em branco entre usuários
+            }
+        } catch (ReflectiveOperationException e) {
+            e.printStackTrace();
         }
     }
+
 
     private void adicionarLivroConsole() {
         System.out.println("\n--- Adicionar Livro ---");
         System.out.print("Título: ");
         String titulo = scanner.nextLine();
-
         System.out.print("Autor: ");
         String autor = scanner.nextLine();
         System.out.print("Ano de Publicação: ");
         int ano = scanner.nextInt();
         Livro livro = new Livro(titulo, autor, ano);
-        if (livro.getTitulo().length() < 3) {
+        if ( ValidationUtils.validateStringSizeMin(livro)) {
             System.out.println("Erro: O título deve ter pelo menos 3 caracteres.");
         }else {
             biblioteca.adicionarLivro(livro);
@@ -97,13 +113,15 @@ public class Console {
         System.out.print("Nome: ");
         String nome = scanner.nextLine();
         Usuario usuario = new Usuario(nome);
-        if (usuario.getNome().length() < 3) {
+
+        if ( ValidationUtils.validateStringSizeMin(usuario)) {
             System.out.println("Erro: O título deve ter pelo menos 3 caracteres.");
         } else {
             biblioteca.adicionarUsuario(usuario);
             System.out.println("ID Usuário: " + usuario.getId());
             System.out.println("Usuário registrado com sucesso.");
         }
+
     }
 
 
